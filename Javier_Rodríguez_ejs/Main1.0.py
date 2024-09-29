@@ -1,48 +1,73 @@
-
-#Import de bibliotecas necesarias:
+import utils
 import time
 import numpy as np
-import utils
+import random
 
-print(f"Welcome to Battleship")
-time.sleep(1)
-utils.dibujar_batalla_barcos()
-time.sleep(2)
+def interfaz_del_juego(idioma):
 
-print(f"Creating your new the game track...")
+    print(utils.traducciones[idioma]["bienvenida"])
+    time.sleep(1)
+    utils.dibujar_batalla_barcos()
+    time.sleep(2)
 
-time.sleep(1)
-tablero_usuario = utils.crear_tablero(10)
-tablero_maquina = utils.crear_tablero(10)
+    while True:
+        modo = input(utils.traducciones[idioma]["elige_modo"]).lower()
+        if modo == utils.traducciones[idioma]["corto"] or modo == utils.traducciones[idioma]["largo"]:
+            break
+        else:
+            print(utils.traducciones[idioma]["modo_no_valido"])
 
-time.sleep(0.5)
-print(f"Your fleet will be made up of 6 ships and they will be placed randomly on the game track.")
+    print(utils.traducciones[idioma]["creando_tablero"])
+    time.sleep(1)
 
-flota_usuario = utils.crear_flota(tablero_usuario)
-flota_maquina = utils.crear_flota(tablero_maquina)
-#print(flota_usuario) if you want to see yours boats before placing in the game track
+    #Crear tableros
+    tablero_usuario = utils.crear_tablero(10)
+    tablero_maquina = utils.crear_tablero(10)
 
-tablero_final = utils.colocar_flota(flota_usuario,tablero_usuario)
-tablero_maquina_final = utils.colocar_flota(flota_maquina,tablero_maquina)
-print(f"\n               Here you are")
-print(tablero_final)
+    #Crear flotas
+    if modo == utils.traducciones[idioma]["corto"]:
+        flota_usuario = utils.crear_flota(tablero_usuario, [1] *6)
+        flota_maquina = utils.crear_flota(tablero_maquina, [1] *6)
+    elif modo == utils.traducciones[idioma]["largo"]:
+        flota_usuario = utils.crear_flota(tablero_usuario, [2,2,2,3,3,4])
+        flota_maquina = utils.crear_flota(tablero_maquina, [2,2,2,3,3,4])
 
-while True: 
-    respuesta = input("Te gusta tu tablero o generamos otro?(True/False)")    
-    if respuesta == "True":
-        print(f"Then you will play with this, GOOD LUCK!")
-        break
-    else:
-        print("Generando nuevo tablero")
-        time.sleep(1)
-        tablero_final = utils.generar_nuevo_tablero()
-        print(tablero_final)
-    
-utils.sistema_de_turnos(tablero_final, tablero_maquina)
+    #Colocar flotas
+    utils.colocar_flota(flota_usuario,tablero_usuario)
+    utils.colocar_flota(flota_maquina,tablero_maquina)
 
-jugar_nuevamente = input("¿Quieres jugar de nuevo? (True/False): ").lower()
-if jugar_nuevamente == "True":
-    jugar()
-else:
-    print(f"Saliendo del juego, que tenga buen día no dude en volver a jugar")
-    print(f"Con un pull de git compruebe las nuevas actualizaciones")
+    time.sleep(0.5)
+    print(utils.traducciones[idioma]["tu_tablero"])
+    utils.mostrar_tablero(tablero_usuario)
+
+    while True: 
+        respuesta = input(utils.traducciones[idioma]["te_gusta_el_tablero"]).lower()    
+        if respuesta == "true":
+            print(utils.traducciones[idioma]["jugaras_con_este"])
+            break
+        else:
+            time.sleep(0.5)
+            tablero_usuario = utils.crear_tablero(10)
+            if modo == utils.traducciones[idioma]["corto"]:
+                flota_usuario = utils.crear_flota(tablero_usuario, [1] * (6))
+            else:
+                flota_usuario = utils.crear_flota(tablero_usuario, [2, 2, 2, 3, 3, 4])
+            utils.colocar_flota(flota_usuario,tablero_usuario)  
+            print(utils.traducciones[idioma]["nuevo_tablero_generado"])
+            utils.mostrar_tablero(tablero_usuario)
+
+    utils.sistema_de_turnos(tablero_usuario, tablero_maquina, flota_usuario, flota_maquina, modo,idioma)
+
+def hundir_la_flota(idioma):
+    while True:
+        interfaz_del_juego(idioma)
+        jugar_nuevamente = input(utils.traducciones[idioma]["jugar_de_nuevo"]).lower()
+        if jugar_nuevamente == "true":  
+            hundir_la_flota()  
+        else:
+            print(utils.traducciones[idioma]["salir_juego"])
+            print(utils.traducciones[idioma]["actualizaciones"])
+            break 
+
+idioma = utils.seleccionar_idioma()
+hundir_la_flota(idioma)
